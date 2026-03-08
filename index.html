@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>我的小網站</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Space+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #f0ede6;
+      --red: #e84c2b;
+      --yellow: #f5c842;
+      --gray: #c8c4bc;
+      --timestamp: #999;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 60px 40px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .site-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: clamp(60px, 16vw, 140px);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -4px;
+      color: var(--white);
+      mix-blend-mode: normal;
+      position: relative;
+      /* ink-bleed texture via text-shadow */
+      text-shadow:
+        2px 2px 0 rgba(255,255,255,0.08),
+        -1px -1px 0 rgba(0,0,0,0.6),
+        3px 3px 8px rgba(0,0,0,0.8);
+      /* rough edge via filter */
+      filter: contrast(1.2) brightness(0.95);
+    }
+
+    .site-title span {
+      display: inline-block;
+      animation: flicker 8s infinite;
+    }
+    .site-title span:nth-child(2) { animation-delay: 2s; }
+    .site-title span:nth-child(3) { animation-delay: 5s; }
+
+    @keyframes flicker {
+      0%, 95%, 100% { opacity: 1; }
+      96% { opacity: 0.4; }
+      97% { opacity: 1; }
+      98% { opacity: 0.2; }
+      99% { opacity: 1; }
+    }
+
+    /* ── FEED ── */
+    .feed {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 0 120px;
+    }
+
+    /* ── ENTRY BASE ── */
+    .entry {
+      position: relative;
+      animation: fadeUp 0.6s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── TIMESTAMP ── */
+    .timestamp {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--timestamp);
+      padding: 28px 40px 12px;
+      display: block;
+    }
+
+    /* ── TEXT ENTRY ── */
+    .entry-text {
+      padding: 16px 40px 30px;
+      position: relative;
+    }
+    .entry-text p {
+      font-size: 14px;
+      line-height: 2;
+      color: var(--gray);
+      max-width: 520px;
+    }
+    /* blurred scanline bg for text blocks */
+    .entry-text::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.018) 0px,
+        rgba(255,255,255,0.018) 1px,
+        transparent 1px,
+        transparent 6px
+      );
+      pointer-events: none;
+    }
+    .entry-text .dash {
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: var(--gray);
+      margin-bottom: 14px;
+      opacity: 0.5;
+    }
+
+    /* ── PHOTO BLOCK: torn-paper single ── */
+    .entry-torn {
+      padding: 0 30px 0;
+      position: relative;
+    }
+    .torn-img {
+      width: 100%;
+      position: relative;
+      display: block;
+    }
+    .torn-img img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      max-height: 340px;
+    }
+    /* torn edge top */
+    .torn-top {
+      position: relative;
+    }
+    .torn-top::before {
+      content: '';
+      position: absolute;
+      top: -18px; left: 0; right: 0;
+      height: 20px;
+      background: var(--black);
+      clip-path: polygon(
+        0% 100%, 2% 40%, 5% 80%, 8% 20%, 12% 70%,
+        16% 10%, 20% 60%, 24% 30%, 28% 75%, 32% 15%,
+        36% 65%, 40% 25%, 44% 80%, 48% 10%, 52% 55%,
+        56% 20%, 60% 70%, 64% 30%, 68% 85%, 72% 10%,
+        76% 60%, 80% 25%, 84% 75%, 88% 15%, 92% 65%,
+        96% 30%, 100% 50%, 100% 100%
+      );
+      z-index: 2;
+    }
+    .torn-bottom {
+      position: relative;
+    }
+    .torn-bottom::after {
+      content: '';
+      position: absolute;
+      bottom: -18px; left: 0; right: 0;
+      height: 20px;
+      background: var(--black);
+      clip-path: polygon(
+        0% 0%, 3% 70%, 7% 20%, 11% 80%, 15% 30%,
+        19% 85%, 23% 20%, 27% 65%, 31% 10%, 35% 70%,
+        39% 25%, 43% 80%, 47% 15%, 51% 60%, 55% 20%,
+        59% 75%, 63% 25%, 67% 80%, 71% 15%, 75% 65%,
+        79% 20%, 83% 70%, 87% 25%, 91% 80%, 95% 30%,
+        100% 60%, 100% 0%
+      );
+      z-index: 2;
+    }
+
+    /* ── PHOTO BLOCK: red bg + polaroids ── */
+    .entry-red {
+      background: var(--red);
+      padding: 40px 40px;
+      position: relative;
+    }
+    .polaroids {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .polaroid {
+      background: #f5f0e8;
+      padding: 8px 8px 28px;
+      box-shadow: 4px 6px 20px rgba(0,0,0,0.4);
+      flex: 1;
+      transform-origin: bottom center;
+    }
+    .polaroid:nth-child(1) { transform: rotate(-4deg) translateY(8px); }
+    .polaroid:nth-child(2) { transform: rotate(1.5deg); }
+    .polaroid:nth-child(3) { transform: rotate(5deg) translateY(12px); }
+    .polaroid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.85) contrast(1.05);
+    }
+
+    /* ── PHOTO BLOCK: yellow + stacked polaroids ── */
+    .entry-yellow {
+      background: var(--yellow);
+      padding: 40px;
+    }
+    .stacked-polaroids {
+      position: relative;
+      width: 220px;
+      height: 260px;
+      margin: 0 auto;
+    }
+    .stacked-polaroids .polaroid {
+      position: absolute;
+      width: 180px;
+    }
+    .stacked-polaroids .polaroid:nth-child(1) {
+      top: 20px; left: 20px;
+      transform: rotate(-6deg);
+      z-index: 1;
+    }
+    .stacked-polaroids .polaroid:nth-child(2) {
+      top: 0; left: 40px;
+      transform: rotate(3deg);
+      z-index: 2;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+      margin: 0 40px;
+    }
+
+    /* ── GRAIN overlay on imgs ── */
+    .grain-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .grain-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      opacity: 0.4;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 60px 0;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.12);
+      text-transform: uppercase;
+    }
+
+    /* placeholder image using CSS gradients */
+    .placeholder-img {
+      width: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="site-title">
+      <span>我</span><span>的</span><span>日誌</span>
+    </div>
+  </header>
+
+  <div class="feed">
+
+    <!-- Entry 1: text only -->
+    <div class="entry" style="animation-delay:0.1s">
+      <span class="timestamp">2024.03.08 09:12:44</span>
+      <div class="entry-text">
+        <span class="dash"></span>
+        <p>今天天氣很好，出門走了很長的路。路邊有一棵樹開始長新葉，很嫩的綠色，讓人心情變得輕盈。</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 2: torn paper photo (simulated with gradient) -->
+    <div class="entry" style="animation-delay:0.2s">
+      <span class="timestamp">2024.03.07 15:38:53</span>
+      <div class="entry-torn">
+        <div class="torn-img torn-top torn-bottom grain-wrap">
+          <div style="
+            width:100%; height:280px;
+            background: linear-gradient(135deg, #8ba5b5 0%, #b8cdd5 30%, #d4dfe3 50%, #c5c0b0 80%, #9e9585 100%);
+            display:flex; align-items:center; justify-content:center;
+            font-size:11px; letter-spacing:3px; color:rgba(255,255,255,0.4);
+          ">
+            ── 在這裡放你的照片 ──
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 3: red bg + polaroids -->
+    <div class="entry" style="animation-delay:0.3s">
+      <span class="timestamp">2024.03.07 13:00:17</span>
+      <div class="entry-red">
+        <div class="polaroids">
+          <div class="polaroid grain-wrap">
+            <div style="width:100%;aspect-ratio:1;background:linear-gradient(160deg,#6b7c8a,#a0b0b8);"></div>
+          </div>
+          <div class="polaroid grain-wrap">
+            <div style="width:100%;aspect-ratio:1;background:linear-gradient(200deg,#7a8c7a,#b0c0a0);"></div>
+          </div>
+          <div class="polaroid grain-wrap">
+            <div style="width:100%;aspect-ratio:1;background:linear-gradient(120deg,#9a8a7a,#c0b0a0);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 4: text -->
+    <div class="entry" style="animation-delay:0.4s">
+      <span class="timestamp">2024.03.06 22:55:01</span>
+      <div class="entry-text">
+        <span class="dash"></span>
+        <p>夜晚安靜下來，窗外偶爾有車聲。喝了一杯熱茶，看了一半的書就睡著了。</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 5: yellow + stacked polaroids -->
+    <div class="entry" style="animation-delay:0.5s">
+      <span class="timestamp">2024.03.05 11:20:33</span>
+      <div class="entry-yellow">
+        <div class="stacked-polaroids">
+          <div class="polaroid grain-wrap">
+            <div style="width:100%;aspect-ratio:1;background:linear-gradient(145deg,#5a6a7a,#8a9aaa);"></div>
+          </div>
+          <div class="polaroid grain-wrap">
+            <div style="width:100%;aspect-ratio:1;background:linear-gradient(165deg,#7a6a5a,#aaa090);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 6: torn photo -->
+    <div class="entry" style="animation-delay:0.6s">
+      <span class="timestamp">2024.03.04 15:08:23</span>
+      <div class="entry-torn">
+        <div class="torn-img torn-top torn-bottom grain-wrap">
+          <div style="
+            width:100%; height:260px;
+            background: linear-gradient(170deg, #7a8a7a 0%, #a0b090 40%, #c0c8a8 70%, #8a9880 100%);
+            display:flex; align-items:center; justify-content:center;
+            font-size:11px; letter-spacing:3px; color:rgba(255,255,255,0.35);
+          ">
+            ── 在這裡放你的照片 ──
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Entry 7: text -->
+    <div class="entry" style="animation-delay:0.7s">
+      <span class="timestamp">2024.03.03 08:44:12</span>
+      <div class="entry-text">
+        <span class="dash"></span>
+        <p>早起，天還沒完全亮。泡了咖啡站在窗邊，城市慢慢從灰色裡醒來。這樣的時刻很珍貴，像是屬於自己的秘密。</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>個人小站 · 每一天都值得被記錄</footer>
+
+</body>
+</html>
